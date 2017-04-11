@@ -1,0 +1,261 @@
+/*Author: D Garrity
+*/
+#include <stdio.h>
+#include <string.h>
+#include "cis411w_header.h"
+
+#define UNAME_LEN  9
+#define PWD_LEN    9
+#define MAX 200
+
+VARCHAR  username[UNAME_LEN];
+VARCHAR  password[PWD_LEN];
+
+/*begin student host variables*/
+VARCHAR  HSID[3];
+VARCHAR  HSLNAME[10];
+VARCHAR  HSFNAME[10];
+VARCHAR  HMAJOR[3];
+VARCHAR  HGENDER[1];
+VARCHAR  HGPA[4];
+VARCHAR  HCRSNBR[6];
+VARCHAR  HCNAME[20];
+VARCHAR  HGRADE[2];
+/*end declaration*/
+
+EXEC SQL INCLUDE SQLCA.H;
+EXEC SQL INCLUDE SQLDA.H;
+extern SQLDA *sqlald();
+
+struct student
+     {  
+        char HSLNAME[20];
+        char HSFNAME[20];
+        char HMAJOR[3];
+        char gender[1];
+        int  GPA;
+        char HSID[9];
+     };
+struct course
+    {
+       char HCRSNBR[6];
+       char HCNAME[20];
+       char HGRADE[2];
+    };
+void get_student_data();
+void get_student_classes();
+void insert_into_student();
+void update_course_grade();
+
+//global declarations
+int  student_id = 0;
+
+int main()
+{
+   //local declarations
+   char           dummy_char      = ' ';
+   int            result_count    = 0;
+   char*          error_code;
+ 
+
+   //local statements
+   int choice = 0;
+
+  strncpy((char *) username.arr, SQL_USERNAME, UNAME_LEN);
+   username.len = strlen((char *) username.arr);
+  
+   strncpy((char *) password.arr, SQL_PASSWORD, PWD_LEN);
+   password.len = strlen((char *) password.arr);
+
+   EXEC SQL WHENEVER SQLERROR GOTO errexit;
+   EXEC SQL CONNECT :username IDENTIFIED BY :password;
+             
+   printf("*************************************\n");
+   printf("*   WELCOME THE S*T*A*R*S SYSTEM    *\n");
+   printf("*                                   *\n");
+   printf("*    Student Transaction and        *\n");
+   printf("*      Registration System          *\n");
+   printf("*************************************\n");
+   
+   while(choice != -1){
+      printf("please enter choice:\n");
+      printf("Student detail:      1\n");
+      printf("Student classes:     2\n");
+      printf("Enter a new Student: 3\n");
+      printf("Update course grade: 4\n");
+      printf("Exit:               -1\n");
+      scanf("%d", &choice);
+   
+      if(choice == 1){
+         get_student_data();
+      }
+      else if(choice == 2){
+         get_student_classes();
+      }
+      else if(choice == 3){
+         insert_into_student();
+      }
+      else if(choice == 4){
+         update_course_grade();
+      }
+      else if(choice == -1){
+         return 0;
+      }
+  }//end while condition
+   return 0;
+
+errexit:
+   printf("Error: %70s", sqlca.sqlerrm.sqlerrmc);
+}
+void get_student_data()
+{
+   //local declarations
+   struct student s[2];
+   int    count = 0;
+
+  //local statements
+   printf("Student ID: ");
+   scanf("%d", &student_id);
+
+   EXEC SQL WHENEVER NOT FOUND GOTO notfound;
+   EXEC SQL SELECT s_lname, s_fname, major
+      INTO :HSLNAME, :HSFNAME, :HMAJOR
+   FROM student
+   WHERE sid = :student_id;   
+
+   HSLNAME.arr[HSLNAME.len] = '\0';
+   strncpy(s[count].HSLNAME,HSLNAME.arr,HSLNAME.len);
+
+   HSLNAME.arr[HSLNAME.len] = '\0';
+   strncpy(s[count].HSFNAME,HSFNAME.arr,HSFNAME.len);
+
+   HMAJOR.arr[3] = '\0';
+   strncpy(s[count].HMAJOR,HMAJOR.arr,4);
+   printf("Student Last Name: %s\n",s[count].HSLNAME);
+   printf("Student First Name: %s\n",s[count].HSFNAME);
+   printf("Student Major: %s\n",s[count].HMAJOR);
+
+   return;
+errexit:
+   printf("Error: %70s", sqlca.sqlerrm.sqlerrmc);
+notfound:
+   printf("No data found for that student ");
+}
+void insert_into_student()
+{
+  //local declarations
+   struct student s[2];
+   
+   
+   printf("Enter student's last name: \n");
+   scanf("%s", HSLNAME.arr);
+   printf("Enter student's first name: \n");
+   scanf("%s", HSFNAME.arr);
+   printf("Enter student's major: \n");
+   scanf("%s", HMAJOR.arr);
+   printf("Enter student's gender: \n");
+   scanf("%s", HGENDER.arr);
+  
+   HSLNAME.len = strlen(HSLNAME.arr);
+   HSFNAME.len = strlen(HSFNAME.arr);
+   HMAJOR.len  = strlen(HMAJOR.arr);
+   HGENDER.len = strlen(HGENDER.arr);
+
+   EXEC SQL WHENEVER SQLERROR GOTO errexit;
+   EXEC SQL
+       SELECT seq_student_sid.NEXTVAL INTO :HSID
+       FROM dual;
+   HSID.len  = strlen(HSID.arr);
+
+   EXEC SQL
+     INSERT INTO student(sid, s_lname, s_fname, major, gender)
+     VALUES (:HSID, :HSLNAME, :HSFNAME, :HMAJOR, :HGENDER);  
+   EXEC SQL COMMIT;
+
+   return;
+errexit:
+   printf("Error: %70s", sqlca.sqlerrm.sqlerrmc);
+notfound:
+   printf("Student added to system.");
+}
+void get_student_classes()
+{
+   //local declarations
+   struct course c[2];
+   int    count = 0;
+   int    HCNAMELEN = 0;
+
+   printf("Student ID: ");
+   scanf("%d", &student_id);
+   
+   //local statements
+   EXEC SQL WHENEVER SQLERROR GOTO errexit;
+   EXEC SQL BEGIN DECLARE SECTION;
+   EXEC SQL END DECLARE SECTION;
+
+   EXEC SQL
+      DECLARE cstdnt CURSOR FOR
+        SELECT course.crsnbr, cname, grade, 
+           length(cname)
+        FROM course, crsenrl
+        WHERE course.crsnbr = crsenrl.crsnbr 
+        AND sid = :student_id;
+  EXEC SQL OPEN cstdnt;
+  do{
+       EXEC SQL FETCH cstdnt
+          INTO :HCRSNBR, :HCNAME, :HGRADE,
+            :HCNAMELEN;
+
+   HCRSNBR.arr[HCRSNBR.len] = '\0';
+   strncpy(c[count].HCRSNBR,HCRSNBR.arr,10);
+   printf("course number: %s\n",c[count].HCRSNBR);
+
+   HCNAME.arr[HCNAMELEN] = '\0';
+   strncpy(c[count].HCNAME,HCNAME.arr,20);
+   printf("course name:   %s\n",c[count].HCNAME);
+
+   HGRADE.arr[2] = '\0';
+   strncpy(c[count].HGRADE,HGRADE.arr,2);
+   printf("Grade: %s\n",c[count].HGRADE);
+
+  }while(sqlca.sqlcode != -1403);
+
+  EXEC SQL CLOSE cstdnt;
+
+  return;
+
+errexit:
+   printf("Error: %70s", sqlca.sqlerrm.sqlerrmc);
+notfound:
+   printf("\n\n");
+}
+void update_course_grade()
+{
+
+   //local declarations
+   struct course c[2];
+
+   //local statements
+   printf("Student ID: ");
+   scanf("%d", &student_id);
+
+   printf("Enter course to be updated: ");
+   scanf("%s", HCRSNBR.arr);
+   HCRSNBR.len  = strlen(HCRSNBR.arr);
+
+   printf("Enter new grade: ");
+   scanf("%s", HGRADE.arr);
+   HGRADE.len  = strlen(HGRADE.arr);
+
+   EXEC SQL WHENEVER SQLERROR GOTO errexit;
+   /*EXEC SQL 
+      SQL goes here...
+    */
+  
+    EXEC SQL commit;
+
+errexit:   
+   printf("Error: %70s", sqlca.sqlerrm.sqlerrmc);
+notfound:
+   printf(" \n");
+}

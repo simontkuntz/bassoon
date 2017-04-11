@@ -1,0 +1,54 @@
+
+SQL*Loader: Release 11.1.0.6.0 - Production on Thu Apr 28 17:20:33 2016
+
+Copyright (c) 1982, 2007, Oracle.  All rights reserved.
+
+Control File:   load_prospects.ctl
+Data File:      prospects_2016.txt
+  Bad File:     prospects_2016.bad
+  Discard File:  none specified
+ 
+ (Allow all discards)
+
+Number to load: ALL
+Number to skip: 0
+Errors allowed: 50
+Bind array:     64 rows, maximum of 256000 bytes
+Continuation:    none specified
+Path used:      Conventional
+
+Table PROSPECTS, loaded from every logical record.
+Insert option in effect for this table: INSERT
+
+   Column Name                  Position   Len  Term Encl Datatype
+------------------------------ ---------- ----- ---- ---- ---------------------
+SID                                 FIRST     *   ,  O(") CHARACTER            
+LAST_NAME                            NEXT     *   ,  O(") CHARACTER            
+FIRST_NAME                           NEXT     *   ,  O(") CHARACTER            
+MAJOR                                NEXT     *   ,  O(") CHARACTER            
+YEAR_TERM_ENTRY                      NEXT     *   ,  O(") CHARACTER            
+
+Record 17888: Rejected - Error on table PROSPECTS, column LAST_NAME.
+ORA-12899: value too large for column "KUNTZST01"."PROSPECTS"."LAST_NAME" (actual: 21, maximum: 20)
+
+
+Table PROSPECTS:
+  51798 Rows successfully loaded.
+  1 Row not loaded due to data errors.
+  0 Rows not loaded because all WHEN clauses were failed.
+  0 Rows not loaded because all fields were null.
+
+
+Space allocated for bind array:                  82560 bytes(64 rows)
+Read   buffer bytes: 1048576
+
+Total logical records skipped:          0
+Total logical records read:         51799
+Total logical records rejected:         1
+Total logical records discarded:        0
+
+Run began on Thu Apr 28 17:20:33 2016
+Run ended on Thu Apr 28 17:20:37 2016
+
+Elapsed time was:     00:00:04.33
+CPU time was:         00:00:00.18

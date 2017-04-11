@@ -1,0 +1,8 @@
+SELECT empno, ename, INITCAP(REPLACE(JOB, 'SALESMAN', 'Sales Person')) 
+as JOB, sal, CONCAT ('New salary: $', (((&raiseAmount / 100)+1)*sal)) as raise FROM GARRITAT.emp;
+COLUMN ename CLEAR
+COLUMN JOB CLEAR
+COLUMN raise CLEAR
+COLUMN ename FORMAT A10
+COLUMN JOB FORMAT A12
+COLUMN raise FORMAT A20

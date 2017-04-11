@@ -1,0 +1,12 @@
+SELECT empno, ename, TRUNC(MONTHS_BETWEEN(HIREDATE, TO_DATE(BIRTH_DT,'MMDDYYYY'))/12) as 
+"Age_When_Hired", 
+CASE SUBSTR(TRUNC(MONTHS_BETWEEN(HIREDATE, TO_DATE(BIRTH_DT,'MMDDYYYY'))/12),1,1)
+	WHEN '2' THEN 'Twenties'
+	WHEN '3' THEN 'Thirties'
+	WHEN '4' THEN 'Fourties'
+	WHEN '5' THEN 'Fifties'
+	WHEN '6' THEN 'Sixties'
+	ELSE 'Error in DATA'
+END AGE
+FROM garritat.emp WHERE BIRTH_DT IS NOT NULL
+ORDER BY "Age_When_Hired";

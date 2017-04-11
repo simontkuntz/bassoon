@@ -1,0 +1,4 @@
+SELECT COUNT(*), JOB, ROUND(AVG(SAL),0) as AvgSal
+FROM garritat.emp
+GROUP BY JOB
+HAVING COUNT(*) >=3;

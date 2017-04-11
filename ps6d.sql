@@ -1,0 +1,3 @@
+SELECT empno, ename, TO_DATE(BIRTH_DT, 'MM/DD/YYYY') FROM garritat.emp;
+COLUMN BIRTH_DT FORMAT A20
+
